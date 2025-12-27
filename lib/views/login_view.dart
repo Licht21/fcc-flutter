@@ -31,59 +31,66 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Login"),
-      ),
-      body: Column(
-        children: [
-          TextField(
-              controller: _email,
-              decoration: const InputDecoration(
-                  hintText: "Enter your email here"
-              ),
-              keyboardType: TextInputType.emailAddress,
-              enableSuggestions: false,
-              autocorrect: false
-          ),
-          TextField(
-            controller: _password,
-            decoration: const InputDecoration(
-                hintText: "Enter your password here"
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Login"),
+        ),
+        body: Column(
+          children: [
+            TextField(
+                controller: _email,
+                decoration: const InputDecoration(
+                    hintText: "Enter your email here"
+                ),
+                keyboardType: TextInputType.emailAddress,
+                enableSuggestions: false,
+                autocorrect: false
             ),
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-          ),
-          TextButton(
-              onPressed: () async {
-                final email = _email.text;
-                final password = _password.text;
-      
-                try {
-                  final UserCredential user = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return HomePage();
-                  }));
-                } on FirebaseAuthException catch (e){
-                  if(e.code == "invalid-credential"){
-                    print("Wrong Credential");
+            TextField(
+              controller: _password,
+              decoration: const InputDecoration(
+                  hintText: "Enter your password here"
+              ),
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+            ),
+            TextButton(
+                onPressed: () async {
+                  final email = _email.text;
+                  final password = _password.text;
+        
+                  try {
+                    await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+                    // Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    //   return HomePage();
+                    // }));
+                    Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        "/notes",
+                        (_) => false
+                    );
+                  } on FirebaseAuthException catch (e){
+                    if(e.code == "invalid-credential"){
+                      print("Wrong Credential");
+                    }
                   }
-                }
-                // final UserCredential user = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-                // print(user);
-              },
-              child: const Text("Login")
-          ),
-          TextButton(onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(
-                context,
-                "/register",
-                (route) => false
-            );
-          },
-              child: const Text("Not Registered Yet? Register Here!"))
-        ],
+                  // final UserCredential user = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+                  // print(user);
+                },
+                child: const Text("Login")
+            ),
+            TextButton(onPressed: () {
+              Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  "/register",
+                  (route) => false
+              );
+            },
+                child: const Text("Not Registered Yet? Register Here!"))
+          ],
+        ),
       ),
     );
   }
