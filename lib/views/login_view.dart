@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:developer' as devtools show log;
 
 import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -75,8 +76,23 @@ class _LoginViewState extends State<LoginView> {
                   );
                 } on FirebaseAuthException catch (e) {
                   if (e.code == "invalid-credential") {
-                    devtools.log("Wrong Credential");
+                    showErrorDialog(context, "Invalid Credential");
+                  } else if (e.code == "user-disabled") {
+                    showErrorDialog(context, "User Disabled");
+                  } else if (e.code == "too-many-requests") {
+                    showErrorDialog(context, "Too Many Request");
+                  } else if (e.code == "invalid-email") {
+                    showErrorDialog(context, "Invalid Email Format");
+                  } else if (e.code == "network-request-failed") {
+                    showErrorDialog(
+                      context,
+                      "Network Error, Please Check Your Connection",
+                    );
+                  } else {
+                    showErrorDialog(context, "Error : ${e.code}");
                   }
+                } catch (e) {
+                  showErrorDialog(context, "Error : ${e.toString()}");
                 }
               },
               child: const Text("Login"),

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:developer' as devtools show log;
 
 import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/utilities/show_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -65,15 +66,27 @@ class _RegisterViewState extends State<RegisterView> {
                         email: email,
                         password: password,
                       );
+                  if (!context.mounted) return;
                   devtools.log(user.toString());
                 } on FirebaseAuthException catch (e) {
                   if (e.code == "email-already-in-use") {
-                    devtools.log("Email Has Been Used");
+                    showErrorDialog(context, "Email Has Been Used");
                   } else if (e.code == "invalid-email") {
-                    devtools.log("Email Invalid");
+                    showErrorDialog(context, "Invalid Email Format");
                   } else if (e.code == "weak-password") {
-                    devtools.log("Weak Password");
+                    showErrorDialog(context, "Weak Password");
+                  } else if (e.code == "too-many-request") {
+                    showErrorDialog(context, "Too Many Request");
+                  } else if (e.code == "network-request-failed") {
+                    showErrorDialog(
+                      context,
+                      "Network Error, Please Check Your Connection!",
+                    );
+                  } else {
+                    showErrorDialog(context, "Error : ${e.code}");
                   }
+                } catch (e) {
+                  showErrorDialog(context, "Error : ${e.toString()}");
                 }
               },
               child: const Text("Register"),
