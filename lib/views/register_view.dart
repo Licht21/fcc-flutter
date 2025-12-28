@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'dart:developer' as devtools show log;
+
+import 'package:mynotes/constants/routes.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -32,56 +33,61 @@ class _RegisterViewState extends State<RegisterView> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: Text("Register"),
-        ),
+        appBar: AppBar(title: Text("Register")),
         body: Column(
           children: [
             TextField(
-                controller: _email,
-                decoration: const InputDecoration(
-                    hintText: "Enter your email here"
-                ),
-                keyboardType: TextInputType.emailAddress,
-                enableSuggestions: false,
-                autocorrect: false
+              controller: _email,
+              decoration: const InputDecoration(
+                hintText: "Enter your email here",
+              ),
+              keyboardType: TextInputType.emailAddress,
+              enableSuggestions: false,
+              autocorrect: false,
             ),
             TextField(
               controller: _password,
               decoration: const InputDecoration(
-                  hintText: "Enter your password here"
+                hintText: "Enter your password here",
               ),
               obscureText: true,
               enableSuggestions: false,
               autocorrect: false,
             ),
             TextButton(
-                onPressed: () async {
-                  final email = _email.text;
-                  final password = _password.text;
-        
-                  try {
-                    final UserCredential user = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
-                    print(user);
-                  } on FirebaseAuthException catch(e) {
-                    if(e.code == "email-already-in-use") {
-                      print("Email Has Been Used");
-                    } else if(e.code == "invalid-email"){
-                      print("Email Invalid");
-                    } else if(e.code == "weak-password") {
-                      print("Weak Password");
-                    }
+              onPressed: () async {
+                final email = _email.text;
+                final password = _password.text;
+
+                try {
+                  final UserCredential user = await FirebaseAuth.instance
+                      .createUserWithEmailAndPassword(
+                        email: email,
+                        password: password,
+                      );
+                  devtools.log(user.toString());
+                } on FirebaseAuthException catch (e) {
+                  if (e.code == "email-already-in-use") {
+                    devtools.log("Email Has Been Used");
+                  } else if (e.code == "invalid-email") {
+                    devtools.log("Email Invalid");
+                  } else if (e.code == "weak-password") {
+                    devtools.log("Weak Password");
                   }
-                },
-                child: const Text("Register")
+                }
+              },
+              child: const Text("Register"),
             ),
-            TextButton(onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamedAndRemoveUntil(
                   context,
-                  "/login",
-                  (route) => false);
-            },
-                child: const Text("Already Register? Login Here!"))
+                  loginRoute,
+                  (route) => false,
+                );
+              },
+              child: const Text("Already Register? Login Here!"),
+            ),
           ],
         ),
       ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mynotes/main.dart';
-import '../firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'dart:developer' as devtools show log;
+
+import 'package:mynotes/constants/routes.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -33,62 +33,64 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Login"),
-        ),
+        appBar: AppBar(title: const Text("Login")),
         body: Column(
           children: [
             TextField(
-                controller: _email,
-                decoration: const InputDecoration(
-                    hintText: "Enter your email here"
-                ),
-                keyboardType: TextInputType.emailAddress,
-                enableSuggestions: false,
-                autocorrect: false
+              controller: _email,
+              decoration: const InputDecoration(
+                hintText: "Enter your email here",
+              ),
+              keyboardType: TextInputType.emailAddress,
+              enableSuggestions: false,
+              autocorrect: false,
             ),
             TextField(
               controller: _password,
               decoration: const InputDecoration(
-                  hintText: "Enter your password here"
+                hintText: "Enter your password here",
               ),
               obscureText: true,
               enableSuggestions: false,
               autocorrect: false,
             ),
             TextButton(
-                onPressed: () async {
-                  final email = _email.text;
-                  final password = _password.text;
-        
-                  try {
-                    await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-                    // Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    //   return HomePage();
-                    // }));
-                    Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        "/notes",
-                        (_) => false
-                    );
-                  } on FirebaseAuthException catch (e){
-                    if(e.code == "invalid-credential"){
-                      print("Wrong Credential");
-                    }
+              onPressed: () async {
+                final email = _email.text;
+                final password = _password.text;
+
+                try {
+                  final UserCredential userCredential = await FirebaseAuth
+                      .instance
+                      .signInWithEmailAndPassword(
+                        email: email,
+                        password: password,
+                      );
+                  devtools.log(userCredential.toString());
+                  if (!context.mounted) return;
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    notesRoute,
+                    (_) => false,
+                  );
+                } on FirebaseAuthException catch (e) {
+                  if (e.code == "invalid-credential") {
+                    devtools.log("Wrong Credential");
                   }
-                  // final UserCredential user = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-                  // print(user);
-                },
-                child: const Text("Login")
+                }
+              },
+              child: const Text("Login"),
             ),
-            TextButton(onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamedAndRemoveUntil(
                   context,
-                  "/register",
-                  (route) => false
-              );
-            },
-                child: const Text("Not Registered Yet? Register Here!"))
+                  registerRoute,
+                  (route) => false,
+                );
+              },
+              child: const Text("Not Registered Yet? Register Here!"),
+            ),
           ],
         ),
       ),
