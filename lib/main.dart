@@ -6,6 +6,7 @@ import 'package:mynotes/views/home_page_view.dart';
 import 'package:mynotes/views/login_view.dart';
 import 'package:mynotes/views/notes_view.dart';
 import 'package:mynotes/views/register_view.dart';
+import 'package:mynotes/views/verify_email_view.dart';
 
 import 'constants/routes.dart';
 
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
         loginRoute: (BuildContext context) => const LoginView(),
         registerRoute: (BuildContext context) => const RegisterView(),
         notesRoute: (BuildContext context) => const NotesView(),
+        verifyEmailRoute: (BuildContext context) => const VerifyEmailView(),
       },
     );
   }

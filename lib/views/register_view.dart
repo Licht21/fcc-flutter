@@ -61,13 +61,17 @@ class _RegisterViewState extends State<RegisterView> {
                 final password = _password.text;
 
                 try {
-                  final UserCredential user = await FirebaseAuth.instance
-                      .createUserWithEmailAndPassword(
-                        email: email,
-                        password: password,
-                      );
+                  await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                    email: email,
+                    password: password,
+                  );
+                  final User? user = FirebaseAuth.instance.currentUser;
+                  await user?.sendEmailVerification();
                   if (!context.mounted) return;
-                  devtools.log(user.toString());
+                  await showErrorDialog(context, "Success To Register Account");
+                  devtools.log("Test");
+                  if (!context.mounted) return;
+                  Navigator.pushNamed(context, "/verify");
                 } on FirebaseAuthException catch (e) {
                   if (e.code == "email-already-in-use") {
                     showErrorDialog(context, "Email Has Been Used");
