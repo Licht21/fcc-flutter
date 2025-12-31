@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
+import 'package:mynotes/utilities/show_error_dialog.dart';
 
 class VerifyEmailView extends StatefulWidget {
   const VerifyEmailView({super.key});
@@ -20,21 +22,28 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
             const Text("Send Again?"),
             TextButton(
               onPressed: () async {
-                final User? user = FirebaseAuth.instance.currentUser;
-                await user?.reload();
-                await user?.sendEmailVerification();
+                try {
+                  await AuthService.firebase().sendEmailVerification();
+                } on UserNotLoggedInAuthException catch (_) {
+                  if (!context.mounted) return;
+                  showErrorDialog(context, "Please Login First!");
+                }
               },
               child: const Text("Send Email Verification"),
             ),
             TextButton(
               onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                if (!context.mounted) return;
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  "/login",
-                  (_) => false,
-                );
+                try {
+                  await AuthService.firebase().logOut();
+                  if (!context.mounted) return;
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    "/login",
+                    (_) => false,
+                  );
+                } on UserNotLoggedInAuthException catch (_) {
+                  showErrorDialog(context, "Please Login First!");
+                }
               },
               child: const Text("To Login Page"),
             ),

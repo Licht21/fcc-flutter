@@ -1,11 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-import '../firebase_options.dart';
-import 'login_view.dart';
-import 'notes_view.dart';
-import 'verify_email_view.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
+import 'package:mynotes/views/login_view.dart';
+import 'package:mynotes/views/notes_view.dart';
+import 'package:mynotes/views/verify_email_view.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -13,16 +11,14 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      ),
+      future: AuthService.firebase().initialize(),
       builder: (context, asyncSnapshot) {
         switch (asyncSnapshot.connectionState) {
           case ConnectionState.done:
-            final User? user = FirebaseAuth.instance.currentUser;
-            if (user != null && user.emailVerified) {
+            final user = AuthService.firebase().currentUser;
+            if (user != null && user.isEmailVerified) {
               return NotesView();
-            } else if (user != null && user.emailVerified == false) {
+            } else if (user != null && user.isEmailVerified == false) {
               return VerifyEmailView();
             } else {
               return LoginView();

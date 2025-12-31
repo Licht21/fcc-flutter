@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
@@ -60,13 +61,13 @@ class _LoginViewState extends State<LoginView> {
                 final password = _password.text;
 
                 try {
-                  await FirebaseAuth.instance.signInWithEmailAndPassword(
+                  await AuthService.firebase().logIn(
                     email: email,
                     password: password,
                   );
                   if (!context.mounted) return;
-                  final User? user = FirebaseAuth.instance.currentUser;
-                  if (user?.emailVerified ?? false) {
+                  final user = AuthService.firebase().currentUser;
+                  if (user?.isEmailVerified ?? false) {
                     Navigator.pushNamedAndRemoveUntil(
                       context,
                       notesRoute,
@@ -79,25 +80,21 @@ class _LoginViewState extends State<LoginView> {
                       (_) => false,
                     );
                   }
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == "invalid-credential") {
-                    showErrorDialog(context, "Invalid Credential");
-                  } else if (e.code == "user-disabled") {
-                    showErrorDialog(context, "User Disabled");
-                  } else if (e.code == "too-many-requests") {
-                    showErrorDialog(context, "Too Many Request");
-                  } else if (e.code == "invalid-email") {
-                    showErrorDialog(context, "Invalid Email Format");
-                  } else if (e.code == "network-request-failed") {
-                    showErrorDialog(
-                      context,
-                      "Network Error, Please Check Your Connection",
-                    );
-                  } else {
-                    showErrorDialog(context, "Error : ${e.code}");
-                  }
-                } catch (e) {
-                  showErrorDialog(context, "Error : ${e.toString()}");
+                } on InvalidCredentialAuthException catch (_) {
+                  showErrorDialog(context, "Invalid Credential");
+                } on UserDisabledAuthException catch (_) {
+                  showErrorDialog(context, "User Disabled");
+                } on TooManyRequestAuthException catch (_) {
+                  showErrorDialog(context, "Too Many Request");
+                } on InvalidEmailAuthException catch (_) {
+                  showErrorDialog(context, "Invalid Email Format");
+                } on NetworkRequestFailedAuthException catch (_) {
+                  showErrorDialog(
+                    context,
+                    "Network Error, Please Check Your Connection",
+                  );
+                } on GenericAuthException catch (_) {
+                  showErrorDialog(context, "Authentication Error");
                 }
               },
               child: const Text("Login"),

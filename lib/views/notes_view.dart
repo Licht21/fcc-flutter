@@ -1,9 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/enums/menu_action.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
+import 'package:mynotes/utilities/show_error_dialog.dart';
 import 'package:mynotes/utilities/show_logout_dialog.dart';
-
-enum MenuAction { logout }
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -24,15 +25,20 @@ class _NotesViewState extends State<NotesView> {
               onSelected: (value) async {
                 switch (value) {
                   case MenuAction.logout:
-                    final shouldLogout = await showLogOutDialog(context);
-                    if (shouldLogout) {
-                      await FirebaseAuth.instance.signOut();
+                    try {
+                      final shouldLogout = await showLogOutDialog(context);
+                      if (shouldLogout) {
+                        await AuthService.firebase().logOut();
+                        if (!context.mounted) return;
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          loginRoute,
+                          (_) => false,
+                        );
+                      }
+                    } on UserNotLoggedInAuthException catch (_) {
                       if (!context.mounted) return;
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        loginRoute,
-                        (_) => false,
-                      );
+                      showErrorDialog(context, "Please Login First");
                     }
                 }
               },
